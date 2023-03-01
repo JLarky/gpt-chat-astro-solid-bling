@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/SPA-layout.astro';
+import { App } from '../qgp/solid';
+---
+
+<Layout title="Vite + Solid">
+	<App client:load url={Astro.request.url} />
+</Layout>
