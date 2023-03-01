@@ -1,6 +1,6 @@
+/** @jsxImportSource solid-js */
 import { Router } from '@solidjs/router';
-import '../index.css';
-import SolidSPA from '../App';
+import SolidSPA from '../components/App';
 
 export const App = (props: { url?: string }) => {
 	return (

@@ -1,5 +1,8 @@
 ---
-import SPA from './SPA.astro';
+import { App } from '../qgp/solid';
+import Layout from '../layouts/SPA-layout.astro';
 ---
 
-<SPA />
+<Layout>
+	<App client:load url={Astro.request.url} />
+</Layout>

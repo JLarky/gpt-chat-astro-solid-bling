@@ -2,9 +2,15 @@
 import solid from 'vite-plugin-solid';
 import { defineCommon, defineVite } from 'qgp';
 import checker from 'vite-plugin-checker';
+import { bling } from '@tanstack/bling/vite';
 
 export const common = defineCommon({
-	vite: {},
+	vite: {
+		plugins: [bling()],
+		build: {
+			sourcemap: true,
+		},
+	},
 });
 
 export default defineVite(common, {
@@ -15,5 +21,10 @@ export default defineVite(common, {
 			overlay: { initialIsOpen: false },
 		}),
 	],
-	server: { port: 5173 },
+	server: {
+		port: 5173,
+		proxy: {
+			'/_m': 'http://localhost:3000/',
+		},
+	},
 });

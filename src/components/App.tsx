@@ -1,7 +1,29 @@
-export default () => (
-	<div>
-		<h1>Hello from the React app!</h1>
-		<a href="/">Go to Astro</a>
-		<p>If the above link doesn't work, you're on the Vite dev server.</p>
-	</div>
-);
+import { Outlet, RouteDefinition, useRoutes } from '@solidjs/router';
+import { GPT } from './GPT';
+
+const routes = [
+	{
+		path: '/',
+		component: () => <Layout />,
+		children: [
+			{
+				path: '/',
+				component: () => <GPT />,
+			},
+		],
+	},
+	{
+		path: '*',
+		component: () => <>404</>,
+	},
+] satisfies RouteDefinition[];
+
+export default function App() {
+	const Routes = useRoutes(routes);
+
+	return <Routes />;
+}
+
+function Layout() {
+	return <Outlet />;
+}

@@ -1,0 +1,4 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /blog/draft
+Host: qgp-gpt.deno.dev
