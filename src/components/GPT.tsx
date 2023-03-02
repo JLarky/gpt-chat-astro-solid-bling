@@ -1,9 +1,46 @@
 import '../styles/tailwind.css';
 import { fetch$ } from '@tanstack/bling';
+import { createSignal, For } from 'solid-js';
+
+type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
 const runServer = fetch$(
-	async function (message: string) {
-		return { response: `you got response: ${message}` };
+	async function (messages: Message[]) {
+		const key = process.env.OPEN_AI_KEY1 + process.env.OPEN_AI_KEY2!;
+		const org = process.env.OPEN_AI_ORG!;
+		if (!1) {
+			return {
+				response: {
+					role: 'assistant' as const,
+					content: 'Шарик нашёл рычаг и дёрнул за него и открылась дверька',
+				},
+			};
+		}
+
+		const res = await fetch('https://api.openai.com/v1/chat/completions', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${key}`,
+				'OpenAI-Organization': org,
+			},
+			body: JSON.stringify({
+				model: 'gpt-3.5-turbo',
+				messages,
+				max_tokens: 1000,
+				temperature: 0.5,
+				top_p: 1,
+				frequency_penalty: 0,
+				presence_penalty: 0,
+			}),
+		});
+		console.log(res);
+		const data = (await res.json()) as {
+			choices: { message: Message }[];
+		};
+		console.log(data);
+		console.log(data.choices[0].message);
+		return { response: data.choices[0].message };
 	},
 	{
 		method: 'GET',
@@ -12,10 +49,24 @@ const runServer = fetch$(
 
 function speak(text: string) {
 	var utterance = new SpeechSynthesisUtterance(text);
+	utterance.lang = 'ru-RU'; // set language to Russian
+	utterance.rate = 0.9;
 	window.speechSynthesis.speak(utterance);
 }
 
 export const GPT = () => {
+	const [messages, setMessages] = createSignal<Message[]>([
+		{
+			role: 'user',
+			content:
+				'ты будешь помогать мне написать художественный расказ для детей, я буду давать тебе инструкции описывающие события которые должны произойти, а ты будешь продолжать рассказ (выводя по одному параграфу) включая эти инструкции. Первая инструкция: Шарик нашёл рычаг и дёрнул за него',
+		},
+		{
+			role: 'assistant',
+			content:
+				'Собачка Шарик нашла рычаг и дёрнула за него. Вдруг она оказалась на улице и там увидела несколько дверей и динамик.',
+		},
+	]);
 	return (
 		<div class="bg-gray-900 text-white min-h-screen">
 			<div class="container mx-auto px-4 py-8">
@@ -27,8 +78,9 @@ export const GPT = () => {
 								<h2 class="text-lg font-medium">John Doe</h2>
 							</div>
 							<div class="messages mb-4">
-								<Message self text="Hi" />
-								<Message text="Hello" />
+								<For each={messages()}>
+									{(message) => <Message self={message.role === 'user'} text={message.content} />}
+								</For>
 							</div>
 							<form
 								class="flex items-center"
@@ -37,7 +89,13 @@ export const GPT = () => {
 									const form = new FormData(e.currentTarget);
 									const message = form.get('message');
 									if (message === null) return;
-									const r = await runServer(message.toString());
+									const newMessages = [
+										...messages(),
+										{ role: 'user' as const, content: message.toString() },
+									];
+									setMessages(newMessages);
+									const r = await runServer(newMessages);
+									setMessages((messages) => [...messages, r.response]);
 									console.log(r.response);
 								}}
 							>
@@ -70,7 +128,7 @@ const Message = (props: { self?: boolean; text: string }) => {
 			</button>
 			<p
 				class={
-					'py-2 px-4 rounded-lg inline-block ' +
+					'p-2 mr-16 rounded-lg inline-block ' +
 					(props.self ? 'bg-gray-200 text-gray-900' : 'bg-gray-700')
 				}
 			>
