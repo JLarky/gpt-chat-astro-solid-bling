@@ -1,7 +1,7 @@
 import '../styles/tailwind.css';
-import { serverFn$ } from '@tanstack/bling';
+import { fetch$ } from '@tanstack/bling';
 
-const runServer = serverFn$(
+const runServer = fetch$(
 	async function (message: string) {
 		return { response: `you got response: ${message}` };
 	},
