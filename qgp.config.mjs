@@ -2,7 +2,7 @@
 import solid from 'vite-plugin-solid';
 import { defineCommon, defineVite } from 'qgp';
 import checker from 'vite-plugin-checker';
-import { bling } from '@tanstack/bling/vite';
+import { bling } from '@qgp-js/bling/vite';
 
 export const common = defineCommon({
 	vite: {

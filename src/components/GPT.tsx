@@ -1,5 +1,5 @@
 import '../styles/tailwind.css';
-import { fetch$ } from '@tanstack/bling';
+import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
@@ -43,7 +43,7 @@ const runServer = fetch$(
 		return { response: data.choices[0].message };
 	},
 	{
-		method: 'GET',
+		method: 'POST',
 	}
 );
 

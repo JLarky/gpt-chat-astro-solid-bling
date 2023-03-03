@@ -719,18 +719,18 @@
     tiny-glob "^0.2.9"
     tslib "^2.4.0"
 
+"@qgp-js/bling@0.4.3", "@qgp-js/bling@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@qgp-js/bling/-/bling-0.4.3.tgz#14e0b3c6ef6935075b29eeafb86b5380217f0df9"
+  integrity sha512-/o4POVoLcecRXlOoVwXg8zcuOK3zb//C1ceQI1x4btZwQXJML64vtOj0+YhC9keZ6vWG9bB8JZEZmZqrtyabwg==
+  dependencies:
+    "@qgp-js/bling" "0.4.3"
+    "@vitejs/plugin-react" "^3.1.0"
+
 "@solidjs/router@^0.7.0":
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@solidjs/router/-/router-0.7.0.tgz#5f8f1289caf4a1eb24e57cbe93e6dde639b04a6e"
   integrity sha512-8HI84twe5FjYRebSLMAhtkL9bRuTDIlxJK56kjfjU9WKGoUCTaWpCnkuj8Hqde1bWZ0X+GOZxKDfNkn1CjtjxA==
-
-"@tanstack/bling@0.3.0", "@tanstack/bling@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/bling/-/bling-0.3.0.tgz#5ae8d0484263ac67a21474f7a1c9d2d1581c0914"
-  integrity sha512-n7uCGpsBx650ydxtAUPU5MxWaR9rHst8dTunjM8qZGVxJqBDhMsGlJR7AVWndizygOCRD7ULLAqJVfCX04NcYg==
-  dependencies:
-    "@tanstack/bling" "0.3.0"
-    "@vitejs/plugin-react" "^3.1.0"
 
 "@total-typescript/ts-reset@^0.3.2":
   version "0.3.2"

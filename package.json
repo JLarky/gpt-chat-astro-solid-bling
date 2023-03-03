@@ -16,8 +16,8 @@
   "dependencies": {
     "@astrojs/deno": "^4.0.2",
     "@astrojs/solid-js": "^2.0.2",
+    "@qgp-js/bling": "^0.4.3",
     "@solidjs/router": "^0.7.0",
-    "@tanstack/bling": "^0.3.0",
     "@total-typescript/ts-reset": "^0.3.2",
     "@types/node": "^18.14.2",
     "astro": "^2.0.14",

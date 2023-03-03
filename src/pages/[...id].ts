@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { handleEvent, hasHandler } from '@tanstack/bling/server';
+import { handleEvent, hasHandler } from '@qgp-js/bling/server';
 
 export const all: APIRoute = async ({ params, request }) => {
 	const id = params.id;
