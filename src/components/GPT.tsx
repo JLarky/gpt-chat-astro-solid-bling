@@ -1,11 +1,18 @@
 import '../styles/tailwind.css';
 import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
+import { checkLimit } from './rate_limit';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
 const runServer = fetch$(
 	async function (messages: Message[]) {
+		const { success } = await checkLimit();
+		if (!success) {
+			return {
+				error: 'Too many requests',
+			};
+		}
 		const key = process.env.OPEN_AI_KEY1 + process.env.OPEN_AI_KEY2!;
 		const org = process.env.OPEN_AI_ORG!;
 		if (!1) {
@@ -34,12 +41,9 @@ const runServer = fetch$(
 				presence_penalty: 0,
 			}),
 		});
-		console.log(res);
 		const data = (await res.json()) as {
 			choices: { message: Message }[];
 		};
-		console.log(data);
-		console.log(data.choices[0].message);
 		return { response: data.choices[0].message };
 	},
 	{
@@ -55,6 +59,7 @@ function speak(text: string) {
 }
 
 export const GPT = () => {
+	let inputRef: HTMLInputElement | undefined;
 	const [messages, setMessages] = createSignal<Message[]>([
 		{
 			role: 'user',
@@ -89,17 +94,24 @@ export const GPT = () => {
 									const form = new FormData(e.currentTarget);
 									const message = form.get('message');
 									if (message === null) return;
-									const newMessages = [
-										...messages(),
-										{ role: 'user' as const, content: message.toString() },
-									];
+									const trimmed = message.toString().trim();
+									if (trimmed === '') return;
+									const myMessage = { role: 'user' as const, content: trimmed };
+									const newMessages = [...messages(), myMessage];
 									setMessages(newMessages);
 									const r = await runServer(newMessages);
-									setMessages((messages) => [...messages, r.response]);
-									console.log(r.response);
+									if (r.error) {
+										alert(r.error);
+										setMessages((x) => x.filter((y) => y !== myMessage));
+										return;
+									} else if (r.response) {
+										setMessages((messages) => [...messages, r.response]);
+										inputRef!.value = '';
+									}
 								}}
 							>
 								<input
+									ref={inputRef}
 									name="message"
 									type="text"
 									class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
