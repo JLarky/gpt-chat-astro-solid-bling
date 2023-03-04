@@ -98,8 +98,9 @@ export const GPT = (props: { ru?: boolean }) => {
 		];
 	};
 	const [messages, setMessages] = createSignal<Message[]>(initialData());
+	const [loading, setLoading] = createSignal(false);
 	return (
-		<div class="bg-gray-900 text-white min-h-screen">
+		<div class="bg-gray-900 text-white pb-8">
 			<div class="container mx-auto px-4 py-8 max-w-[800px]">
 				<div class="bg-gray-800 rounded-lg p-4">
 					<div class="flex items-center mb-4">
@@ -118,6 +119,7 @@ export const GPT = (props: { ru?: boolean }) => {
 								/>
 							)}
 						</For>
+						{loading() && <Message ru={false} text="..." />}
 					</div>
 					<form
 						class="flex items-center"
@@ -131,27 +133,39 @@ export const GPT = (props: { ru?: boolean }) => {
 							const myMessage = { role: 'user' as const, content: trimmed };
 							const newMessages = [...messages(), myMessage];
 							setMessages(newMessages);
+							setLoading(true);
+							const ref = inputRef!;
+							ref.scrollIntoView();
+							ref.value = '';
 							const r = await runServer(newMessages).catch((e) => {
 								return { error: e.toString(), response: undefined };
 							});
+							setLoading(false);
 							if (r.error) {
 								alert(r.error);
 								setMessages((x) => x.filter((y) => y !== myMessage));
+								ref.value = trimmed;
 								return;
 							} else if (r.response) {
 								setMessages((messages) => [...messages, r.response]);
-								inputRef!.value = '';
 							}
+							ref.focus();
+							ref.scrollIntoView();
 						}}
 					>
 						<input
+							disabled={loading()}
 							ref={inputRef}
 							name="message"
 							type="text"
 							class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
 							placeholder="Type your message..."
 						/>
-						<button type="submit" class="bg-gray-600 text-white rounded-lg py-2 px-4">
+						<button
+							type="submit"
+							class="bg-gray-600 text-white rounded-lg py-2 px-4 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
+							disabled={loading()}
+						>
 							Send
 						</button>
 					</form>
