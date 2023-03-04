@@ -2,6 +2,7 @@ import '../styles/tailwind.css';
 import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
 import { checkLimit } from './rate_limit';
+import robot from '../assets/robot.webp';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
@@ -98,63 +99,61 @@ export const GPT = (props: { ru?: boolean }) => {
 	const [messages, setMessages] = createSignal<Message[]>(initialData());
 	return (
 		<div class="bg-gray-900 text-white min-h-screen">
-			<div class="container mx-auto px-4 py-8">
-				<div class="grid grid-cols-12 gap-4">
-					<div class="col-span-12 lg:col-span-8">
-						<div class="bg-gray-800 rounded-lg p-4">
-							<div class="flex items-center mb-4">
-								<div class="h-8 w-8 bg-gray-700 rounded-full mr-2"></div>
-								<h2 class="text-lg font-medium">John Doe</h2>
-							</div>
-							<div class="messages mb-4">
-								<For each={messages()}>
-									{(message) => (
-										<Message
-											self={message.role === 'user'}
-											text={message.content}
-											ru={props.ru ?? false}
-										/>
-									)}
-								</For>
-							</div>
-							<form
-								class="flex items-center"
-								onSubmit={async (e) => {
-									e.preventDefault();
-									const form = new FormData(e.currentTarget);
-									const message = form.get('message');
-									if (message === null) return;
-									const trimmed = message.toString().trim();
-									if (trimmed === '') return;
-									const myMessage = { role: 'user' as const, content: trimmed };
-									const newMessages = [...messages(), myMessage];
-									setMessages(newMessages);
-									const r = await runServer(newMessages).catch((e) => {
-										return { error: e.toString(), response: undefined };
-									});
-									if (r.error) {
-										alert(r.error);
-										setMessages((x) => x.filter((y) => y !== myMessage));
-										return;
-									} else if (r.response) {
-										setMessages((messages) => [...messages, r.response]);
-										inputRef!.value = '';
-									}
-								}}
-							>
-								<input
-									ref={inputRef}
-									name="message"
-									type="text"
-									class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
-									placeholder="Type your message..."
-								/>
-								<button type="submit" class="bg-gray-600 text-white rounded-lg py-2 px-4">
-									Send
-								</button>
-							</form>
+			<div class="container mx-auto px-4 py-8 max-w-[800px]">
+				<div class="bg-gray-800 rounded-lg p-4">
+					<div class="flex items-center mb-4">
+						<div class="h-12 w-12 bg-gray-700 rounded-full mr-2">
+							<img src={robot} alt="robot" class="[image-rendering:pixelated] rounded-full" />
 						</div>
+						<h2 class="text-lg font-medium">Fairy tale GPT</h2>
 					</div>
+					<div class="messages mb-4">
+						<For each={messages()}>
+							{(message) => (
+								<Message
+									self={message.role === 'user'}
+									text={message.content}
+									ru={props.ru ?? false}
+								/>
+							)}
+						</For>
+					</div>
+					<form
+						class="flex items-center"
+						onSubmit={async (e) => {
+							e.preventDefault();
+							const form = new FormData(e.currentTarget);
+							const message = form.get('message');
+							if (message === null) return;
+							const trimmed = message.toString().trim();
+							if (trimmed === '') return;
+							const myMessage = { role: 'user' as const, content: trimmed };
+							const newMessages = [...messages(), myMessage];
+							setMessages(newMessages);
+							const r = await runServer(newMessages).catch((e) => {
+								return { error: e.toString(), response: undefined };
+							});
+							if (r.error) {
+								alert(r.error);
+								setMessages((x) => x.filter((y) => y !== myMessage));
+								return;
+							} else if (r.response) {
+								setMessages((messages) => [...messages, r.response]);
+								inputRef!.value = '';
+							}
+						}}
+					>
+						<input
+							ref={inputRef}
+							name="message"
+							type="text"
+							class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
+							placeholder="Type your message..."
+						/>
+						<button type="submit" class="bg-gray-600 text-white rounded-lg py-2 px-4">
+							Send
+						</button>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -165,19 +164,21 @@ const Message = (props: { self?: boolean; text: string; ru: boolean }) => {
 	return (
 		<div class="message mb-2 relative">
 			<button
-				class="absolute right-0 bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-2 px-4"
+				class="absolute right-0 bg-gray-700 hover:bg-gray-600 text-white rounded-lg p-2"
 				onClick={() => speak(props.text, props.ru)}
 			>
 				TTS
 			</button>
-			<p
-				class={
-					'p-2 mr-16 rounded-lg inline-block ' +
-					(props.self ? 'bg-gray-200 text-gray-900' : 'bg-gray-700')
-				}
-			>
-				{props.text}
-			</p>
+			<div class="mr-16">
+				<p
+					class={
+						'p-2 rounded-lg inline-block ' +
+						(props.self ? 'ml-8 bg-gray-200 text-gray-900' : 'mr-8 bg-gray-700')
+					}
+				>
+					{props.text}
+				</p>
+			</div>
 		</div>
 	);
 };
