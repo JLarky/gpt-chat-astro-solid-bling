@@ -42,8 +42,14 @@ const runServer = fetch$(
 			}),
 		});
 		const data = (await res.json()) as {
-			choices: { message: Message }[];
+			choices?: { message: Message }[];
 		};
+		if (!data.choices) {
+			console.error('GPT error:', data);
+			return {
+				error: 'Failed to get response from ChatGPT',
+			};
+		}
 		return { response: data.choices[0].message };
 	},
 	{
@@ -51,27 +57,45 @@ const runServer = fetch$(
 	}
 );
 
-function speak(text: string) {
+function speak(text: string, ru: boolean) {
 	var utterance = new SpeechSynthesisUtterance(text);
-	utterance.lang = 'ru-RU'; // set language to Russian
-	utterance.rate = 0.9;
+	if (ru) {
+		utterance.lang = 'ru-RU'; // set language to Russian
+		utterance.rate = 0.9;
+	}
 	window.speechSynthesis.speak(utterance);
 }
 
-export const GPT = () => {
+export const GPT = (props: { ru?: boolean }) => {
 	let inputRef: HTMLInputElement | undefined;
-	const [messages, setMessages] = createSignal<Message[]>([
-		{
-			role: 'user',
-			content:
-				'ты будешь помогать мне написать художественный расказ для детей, я буду давать тебе инструкции описывающие события которые должны произойти, а ты будешь продолжать рассказ (выводя по одному параграфу) включая эти инструкции. Первая инструкция: Шарик нашёл рычаг и дёрнул за него',
-		},
-		{
-			role: 'assistant',
-			content:
-				'Собачка Шарик нашла рычаг и дёрнула за него. Вдруг она оказалась на улице и там увидела несколько дверей и динамик.',
-		},
-	]);
+	const initialData = (): Message[] => {
+		if (props.ru) {
+			return [
+				{
+					role: 'user',
+					content:
+						'ты будешь помогать мне написать художественный расказ для детей, я буду давать тебе инструкции описывающие события которые должны произойти, а ты будешь продолжать рассказ (выводя по одному параграфу) включая эти инструкции. Первая инструкция: Шарик нашёл рычаг и дёрнул за него',
+				},
+				{
+					role: 'assistant',
+					content:
+						'Собачка Шарик нашла рычаг и дёрнула за него. Вдруг она оказалась на улице и там увидела несколько дверей и динамик.',
+				},
+			];
+		}
+		return [
+			{
+				role: 'user',
+				content: `I want you to act as a storyteller. You are going to write a story for children. I will give you instructions describing the events that should happen, and you will continue the story (outputting one paragraph at a time) including these instructions. The first instruction is: "a dog found a lever and pulled it"`,
+			},
+			{
+				role: 'assistant',
+				content:
+					'The dog found a lever and pulled it. Suddenly she was outside and saw several doors has to chose which one to open.',
+			},
+		];
+	};
+	const [messages, setMessages] = createSignal<Message[]>(initialData());
 	return (
 		<div class="bg-gray-900 text-white min-h-screen">
 			<div class="container mx-auto px-4 py-8">
@@ -84,7 +108,13 @@ export const GPT = () => {
 							</div>
 							<div class="messages mb-4">
 								<For each={messages()}>
-									{(message) => <Message self={message.role === 'user'} text={message.content} />}
+									{(message) => (
+										<Message
+											self={message.role === 'user'}
+											text={message.content}
+											ru={props.ru ?? false}
+										/>
+									)}
 								</For>
 							</div>
 							<form
@@ -99,7 +129,9 @@ export const GPT = () => {
 									const myMessage = { role: 'user' as const, content: trimmed };
 									const newMessages = [...messages(), myMessage];
 									setMessages(newMessages);
-									const r = await runServer(newMessages);
+									const r = await runServer(newMessages).catch((e) => {
+										return { error: e.toString(), response: undefined };
+									});
 									if (r.error) {
 										alert(r.error);
 										setMessages((x) => x.filter((y) => y !== myMessage));
@@ -129,12 +161,12 @@ export const GPT = () => {
 	);
 };
 
-const Message = (props: { self?: boolean; text: string }) => {
+const Message = (props: { self?: boolean; text: string; ru: boolean }) => {
 	return (
 		<div class="message mb-2 relative">
 			<button
 				class="absolute right-0 bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-2 px-4"
-				onClick={() => speak(props.text)}
+				onClick={() => speak(props.text, props.ru)}
 			>
 				TTS
 			</button>
