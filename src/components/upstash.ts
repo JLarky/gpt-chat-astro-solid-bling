@@ -1,3 +1,4 @@
+import { redis_token, redis_url } from '../config.server$';
 import { Redis } from '@upstash/redis'; // for deno: see above
 
 /**
@@ -210,8 +211,8 @@ export function slidingWindow(
 const cache = new Cache(new Map());
 
 const redis = new Redis({
-	url: process.env.UPSTASH_REDIS_REST_URL,
-	token: process.env.UPSTASH_REDIS_REST_TOKEN,
+	url: redis_url,
+	token: redis_token,
 });
 
 export const rateLimit = (limiter: Algorithm<RegionContext>, identifier: string) => {

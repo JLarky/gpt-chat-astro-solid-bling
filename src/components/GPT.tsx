@@ -3,6 +3,7 @@ import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
 import { checkLimit } from './rate_limit';
 import robot from '../assets/robot.webp';
+import { OPEN_AI_KEY, OPEN_AI_ORG } from '../config.server$';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
@@ -14,8 +15,8 @@ const runServer = fetch$(
 				error: 'Too many requests',
 			};
 		}
-		const key = process.env.OPEN_AI_KEY1 + process.env.OPEN_AI_KEY2!;
-		const org = process.env.OPEN_AI_ORG!;
+		const key = OPEN_AI_KEY;
+		const org = OPEN_AI_ORG;
 		if (!1) {
 			return {
 				response: {
@@ -155,6 +156,24 @@ export const GPT = (props: { ru?: boolean }) => {
 						</button>
 					</form>
 				</div>
+			</div>
+			<div class="fixed bottom-0 right-0 p-2 flex">
+				<a
+					href="https://github.com/JLarky/gpt-chat-astro-solid-bling"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="flex items-center py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 bg-gray-700 text-white hover:bg-gray-600 focus:ring-offset-gray-900"
+				>
+					<span>Star on Github</span>
+				</a>
+				<a
+					href="http://qgp.app/"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="ml-2 flex items-center py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 bg-gray-700 text-white hover:bg-gray-600 focus:ring-offset-gray-900"
+				>
+					<span>Built with QGP</span>
+				</a>
 			</div>
 		</div>
 	);
