@@ -4,6 +4,7 @@ import { createSignal, For } from 'solid-js';
 import { checkLimit } from './rate_limit';
 import robot from '../assets/robot.webp';
 import { OPEN_AI_KEY, OPEN_AI_ORG } from '../config.server$';
+import { TTS } from './TTS';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
@@ -17,7 +18,8 @@ const runServer = fetch$(
 		}
 		const key = OPEN_AI_KEY;
 		const org = OPEN_AI_ORG;
-		if (!1) {
+		if (1) {
+			await new Promise((r) => setTimeout(r, 1000));
 			return {
 				response: {
 					role: 'assistant' as const,
@@ -58,15 +60,6 @@ const runServer = fetch$(
 		method: 'POST',
 	}
 );
-
-function speak(text: string, ru: boolean) {
-	var utterance = new SpeechSynthesisUtterance(text);
-	if (ru) {
-		utterance.lang = 'ru-RU'; // set language to Russian
-		utterance.rate = 0.9;
-	}
-	window.speechSynthesis.speak(utterance);
-}
 
 export const GPT = (props: { ru?: boolean }) => {
 	let inputRef: HTMLInputElement | undefined;
@@ -196,12 +189,7 @@ export const GPT = (props: { ru?: boolean }) => {
 const Message = (props: { self?: boolean; text: string; ru: boolean }) => {
 	return (
 		<div class="message mb-2 relative">
-			<button
-				class="absolute right-0 bg-gray-700 hover:bg-gray-600 text-white rounded-lg p-2"
-				onClick={() => speak(props.text, props.ru)}
-			>
-				TTS
-			</button>
+			<TTS text={props.text} ru={props.ru} />
 			<div class="mr-16">
 				<p
 					class={
