@@ -18,7 +18,7 @@ const runServer = fetch$(
 		}
 		const key = OPEN_AI_KEY;
 		const org = OPEN_AI_ORG;
-		if (1) {
+		if (!1) {
 			await new Promise((r) => setTimeout(r, 1000));
 			return {
 				response: {
