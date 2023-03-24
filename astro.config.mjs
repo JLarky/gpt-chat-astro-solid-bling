@@ -12,7 +12,7 @@ export default defineConfig({
 	integrations: [solid()],
 	vite: defineAstro(common, {
 		ssr: {
-			noExternal: ['util'],
+			external: ['gpt3-tokenizer'],
 		},
 	}),
 	server: { port: 3000 },
