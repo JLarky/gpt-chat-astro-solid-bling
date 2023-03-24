@@ -9,7 +9,7 @@ import { TTS } from './TTS';
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
 const runServer = fetch$(
-	async function (messages: Message[]) {
+	async function ({ override, messages }: { override?: { model?: string }; messages: Message[] }) {
 		const { success } = await checkLimit();
 		if (!success) {
 			return {
@@ -43,6 +43,7 @@ const runServer = fetch$(
 				top_p: 1,
 				frequency_penalty: 0,
 				presence_penalty: 0,
+				...override,
 			}),
 		});
 		const data = (await res.json()) as {
@@ -61,9 +62,13 @@ const runServer = fetch$(
 	}
 );
 
-export const GPT = (props: { ru?: boolean }) => {
+export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 	let inputRef: HTMLInputElement | undefined;
+	let textareaRef: HTMLTextAreaElement | undefined;
 	const initialData = (): Message[] => {
+		if (props.clean) {
+			return [];
+		}
 		if (props.ru) {
 			return [
 				{
@@ -92,6 +97,7 @@ export const GPT = (props: { ru?: boolean }) => {
 	};
 	const [messages, setMessages] = createSignal<Message[]>(initialData());
 	const [loading, setLoading] = createSignal(false);
+	const [allowDelete, setAllowDelete] = createSignal(false);
 	return (
 		<div class="bg-gray-900 text-white pb-8">
 			<div class="container mx-auto px-4 py-8 max-w-[800px]">
@@ -101,11 +107,22 @@ export const GPT = (props: { ru?: boolean }) => {
 							<img src={robot} alt="robot" class="[image-rendering:pixelated] rounded-full" />
 						</div>
 						<h2 class="text-lg font-medium">Fairy tale GPT</h2>
+						<button class="mr-2 ml-auto" onClick={() => setAllowDelete((x) => !x)}>
+							{!allowDelete() ? 'Allow to delete' : 'Return back'}
+						</button>
 					</div>
 					<div class="messages mb-4">
 						<For each={messages()}>
 							{(message) => (
 								<Message
+									onDelete={
+										allowDelete()
+											? () => {
+													setMessages((x) => x.filter((m) => m !== message));
+													setAllowDelete(messages().length !== 0);
+											  }
+											: undefined
+									}
 									self={message.role === 'user'}
 									text={message.content}
 									ru={props.ru ?? false}
@@ -127,10 +144,16 @@ export const GPT = (props: { ru?: boolean }) => {
 							const newMessages = [...messages(), myMessage];
 							setMessages(newMessages);
 							setLoading(true);
-							const ref = inputRef!;
+							const ref = inputRef! || textareaRef!;
 							ref.scrollIntoView();
 							ref.value = '';
-							const r = await runServer(newMessages).catch((e) => {
+							const override = props.clean
+								? {
+										// model: 'gpt-4-32k',
+										model: 'gpt-4',
+								  }
+								: undefined;
+							const r = await runServer({ override, messages: newMessages }).catch((e) => {
 								return { error: e.toString(), response: undefined };
 							});
 							setLoading(false);
@@ -146,14 +169,25 @@ export const GPT = (props: { ru?: boolean }) => {
 							ref.scrollIntoView();
 						}}
 					>
-						<input
-							disabled={loading()}
-							ref={inputRef}
-							name="message"
-							type="text"
-							class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
-							placeholder="Type your message..."
-						/>
+						{props.clean ? (
+							<textarea
+								disabled={loading()}
+								ref={textareaRef}
+								name="message"
+								class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
+								placeholder="Type your message..."
+							></textarea>
+						) : (
+							<input
+								disabled={loading()}
+								ref={inputRef}
+								name="message"
+								class="flex-1 bg-gray-700 text-white rounded-lg py-2 px-4 mr-4"
+								placeholder="Type your message..."
+								autocomplete="off"
+							/>
+						)}
+
 						<button
 							type="submit"
 							class="bg-gray-600 text-white rounded-lg py-2 px-4 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -186,14 +220,18 @@ export const GPT = (props: { ru?: boolean }) => {
 	);
 };
 
-const Message = (props: { self?: boolean; text: string; ru: boolean }) => {
+const Message = (props: { self?: boolean; onDelete?: () => void; text: string; ru: boolean }) => {
 	return (
 		<div class="message mb-2 relative">
-			<TTS text={props.text} ru={props.ru} />
+			{props.onDelete ? (
+				<Delete onDelete={props.onDelete} />
+			) : (
+				<TTS text={props.text} ru={props.ru} />
+			)}
 			<div class="mr-16">
 				<p
 					class={
-						'p-2 rounded-lg inline-block ' +
+						'whitespace-pre-wrap p-2 rounded-lg inline-block ' +
 						(props.self ? 'ml-8 bg-gray-200 text-gray-900' : 'mr-8 bg-gray-700')
 					}
 				>
@@ -201,5 +239,16 @@ const Message = (props: { self?: boolean; text: string; ru: boolean }) => {
 				</p>
 			</div>
 		</div>
+	);
+};
+
+export const Delete = (props: { onDelete: () => void }) => {
+	return (
+		<button
+			class="absolute right-0 bg-gray-700 hover:bg-gray-600 text-white rounded-lg p-2"
+			onClick={props.onDelete}
+		>
+			Delete
+		</button>
 	);
 };

@@ -14,6 +14,10 @@ const routes = [
 				path: '/sharik',
 				component: () => <GPT ru={true} />,
 			},
+			{
+				path: '/clean',
+				component: () => <GPT clean={true} />,
+			},
 		],
 	},
 	{
