@@ -38,7 +38,6 @@ const runServer = fetch$(
 			body: JSON.stringify({
 				model: 'gpt-3.5-turbo',
 				messages,
-				max_tokens: 1000,
 				temperature: 0.5,
 				top_p: 1,
 				frequency_penalty: 0,
