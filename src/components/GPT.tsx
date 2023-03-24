@@ -1,4 +1,5 @@
 import '../styles/tailwind.css';
+import GPT3Tokenizer from 'gpt3-tokenizer';
 import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
 import { checkLimit } from './rate_limit';
@@ -27,6 +28,18 @@ const runServer = fetch$(
 				},
 			};
 		}
+
+		const tokenizer = new GPT3Tokenizer({ type: 'gpt3' }); // or 'codex'
+		const sizes = messages.map((m) => {
+			return tokenizer.encode(m.content).bpe.length;
+		});
+
+		const max_model_tokens = override?.model === 'gpt-4' ? 8192 : 4096;
+
+		const sum = sizes.reduce((a, b) => a + b, 0);
+
+		const max_tokens = max_model_tokens - sum - 100; // 100 buffer
+		console.log(sizes, max_tokens);
 
 		const res = await fetch('https://api.openai.com/v1/chat/completions', {
 			method: 'POST',
