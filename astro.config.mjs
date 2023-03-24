@@ -10,7 +10,11 @@ import { common } from './qgp.config.mjs';
 export default defineConfig({
 	site: 'https://qgp-qgp.deno.dev',
 	integrations: [solid()],
-	vite: defineAstro(common, {}),
+	vite: defineAstro(common, {
+		ssr: {
+			noExternal: ['util'],
+		},
+	}),
 	server: { port: 3000 },
 	output: 'server',
 	adapter: deno(),
