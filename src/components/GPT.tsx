@@ -1,60 +1,20 @@
 import '../styles/tailwind.css';
 import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
-import { checkLimit } from './rate_limit';
 import robot from '../assets/robot.webp';
-import { OPEN_AI_KEY, OPEN_AI_ORG } from '../config.server$';
 import { TTS } from './TTS';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
 const runServer = fetch$(
 	async function ({ override, messages }: { override?: { model?: string }; messages: Message[] }) {
-		const { success } = await checkLimit();
-		if (!success) {
-			return {
-				error: 'Too many requests',
-			};
-		}
-		const key = OPEN_AI_KEY;
-		const org = OPEN_AI_ORG;
-		if (!1) {
-			await new Promise((r) => setTimeout(r, 1000));
-			return {
-				response: {
-					role: 'assistant' as const,
-					content: 'Шарик нашёл рычаг и дёрнул за него и открылась дверька',
-				},
-			};
-		}
-
-		const res = await fetch('https://api.openai.com/v1/chat/completions', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${key}`,
-				'OpenAI-Organization': org,
+		await new Promise((r) => setTimeout(r, 1000));
+		return {
+			response: {
+				role: 'assistant' as const,
+				content: 'Шарик нашёл рычаг и дёрнул за него и открылась дверька',
 			},
-			body: JSON.stringify({
-				model: 'gpt-3.5-turbo',
-				messages,
-				temperature: 0.5,
-				top_p: 1,
-				frequency_penalty: 0,
-				presence_penalty: 0,
-				...override,
-			}),
-		});
-		const data = (await res.json()) as {
-			choices?: { message: Message }[];
 		};
-		if (!data.choices) {
-			console.error('GPT error:', data);
-			return {
-				error: 'Failed to get response from ChatGPT',
-			};
-		}
-		return { response: data.choices[0].message };
 	},
 	{
 		method: 'POST',
@@ -156,12 +116,7 @@ export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 								return { error: e.toString(), response: undefined };
 							});
 							setLoading(false);
-							if (r.error) {
-								alert(r.error);
-								setMessages((x) => x.filter((y) => y !== myMessage));
-								ref.value = trimmed;
-								return;
-							} else if (r.response) {
+							if (r.response) {
 								setMessages((messages) => [...messages, r.response]);
 							}
 							ref.focus();
