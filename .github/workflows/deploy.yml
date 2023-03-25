@@ -22,6 +22,6 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: qgp-gpt
+          project: dan-jutan-astro-bling
           entrypoint: server/entry.mjs
           root: dist
