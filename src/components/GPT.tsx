@@ -3,30 +3,35 @@ import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
 import robot from '../assets/robot.webp';
 import { TTS } from './TTS';
-import { getCollection, getEntryBySlug } from "astro:content";
-
+import { getEntryBySlug } from 'astro:content';
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
 const runServer = fetch$(
-	async function ({ override, messages }: { override?: { model?: string }; messages: Message[] }) {
-		await new Promise((r) => setTimeout(r, 1000));
+	async function ({ messages }: { messages: Message[] }) {
+		// await new Promise((r) => setTimeout(r, 1000));
 
-    const latest = messages!.pop()!.content;
+		const latest = messages!.pop()!.content;
 
-    const entry = await getEntryBySlug("test", latest);
+		const words = latest.replace('?', '').split(' ');
 
-    const content = entry?.body || "No entry";
+		let content = 'No entry';
 
-    // const string = testCollection[0].body;
-
-    // console.log("testing", string);
+		// each word
+		for (let i = 0; i < words.length; i++) {
+			const word = words[i];
+			const entry = await getEntryBySlug('test', word);
+			console.log('entry', entry);
+			if (entry) {
+				content = entry.body;
+				break;
+			}
+		}
 
 		return {
-
 			response: {
 				role: 'assistant' as const,
-        content
+				content,
 			},
 		};
 	},
@@ -59,18 +64,17 @@ export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 		return [
 			{
 				role: 'user',
-				content: `I want you to act as a storyteller. You are going to write a story for children. I will give you instructions describing the events that should happen, and you will continue the story (outputting one paragraph at a time) including these instructions. The first instruction is: "a dog found a lever and pulled it"`,
+				content: `I'm a user who can ask something from the server like "who is jazzypants?" or just "fuzzy"`,
 			},
 			{
 				role: 'assistant',
-				content:
-					'The dog found a lever and pulled it. Suddenly she was outside and saw several doors has to chose which one to open.',
+				content: 'That makes sense, please ask and I will respond',
 			},
 		];
 	};
 	const [messages, setMessages] = createSignal<Message[]>(initialData());
 	const [loading, setLoading] = createSignal(false);
-	const [allowDelete, setAllowDelete] = createSignal(false);
+	const allowDelete = true;
 	return (
 		<div class="bg-gray-900 text-white pb-8">
 			<div class="container mx-auto px-4 py-8 max-w-[800px]">
@@ -79,23 +83,18 @@ export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 						<div class="h-12 w-12 bg-gray-700 rounded-full mr-2">
 							<img src={robot} alt="robot" class="[image-rendering:pixelated] rounded-full" />
 						</div>
-						<h2 class="text-lg font-medium">Fairy tale GPT</h2>
-						<button class="mr-2 ml-auto" onClick={() => setAllowDelete((x) => !x)}>
-							{!allowDelete() ? 'Allow to delete' : 'Return back'}
-						</button>
+						<h2 class="text-lg font-medium">Dan Jutan demo</h2>
+						<a href="https://twitter.com/jutanium" class="mr-2 ml-auto">
+							his twitter
+						</a>
 					</div>
 					<div class="messages mb-4">
 						<For each={messages()}>
 							{(message) => (
 								<Message
-									onDelete={
-										allowDelete()
-											? () => {
-													setMessages((x) => x.filter((m) => m !== message));
-													setAllowDelete(messages().length !== 0);
-											  }
-											: undefined
-									}
+									onDelete={() => {
+										setMessages((x) => x.filter((m) => m !== message));
+									}}
 									self={message.role === 'user'}
 									text={message.content}
 									ru={props.ru ?? false}
@@ -120,13 +119,7 @@ export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 							const ref = inputRef! || textareaRef!;
 							ref.scrollIntoView();
 							ref.value = '';
-							const override = props.clean
-								? {
-										// model: 'gpt-4-32k',
-										model: 'gpt-4',
-								  }
-								: undefined;
-							const r = await runServer({ override, messages: newMessages }).catch((e) => {
+							const r = await runServer({ messages: newMessages }).catch((e) => {
 								return { error: e.toString(), response: undefined };
 							});
 							setLoading(false);
@@ -168,7 +161,7 @@ export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 			</div>
 			<div class="fixed bottom-0 right-0 p-2 flex">
 				<a
-					href="https://github.com/JLarky/gpt-chat-astro-solid-bling"
+					href="https://github.com/JLarky/gpt-chat-astro-solid-bling/tree/for-dan-jutan"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="flex items-center py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 bg-gray-700 text-white hover:bg-gray-600 focus:ring-offset-gray-900"
