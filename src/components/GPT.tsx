@@ -3,16 +3,30 @@ import { fetch$ } from '@qgp-js/bling';
 import { createSignal, For } from 'solid-js';
 import robot from '../assets/robot.webp';
 import { TTS } from './TTS';
+import { getCollection, getEntryBySlug } from "astro:content";
+
 
 type Message = { content: string; role: 'user' | 'system' | 'assistant' };
 
 const runServer = fetch$(
 	async function ({ override, messages }: { override?: { model?: string }; messages: Message[] }) {
 		await new Promise((r) => setTimeout(r, 1000));
+
+    const latest = messages!.pop()!.content;
+
+    const entry = await getEntryBySlug("test", latest);
+
+    const content = entry?.body || "No entry";
+
+    // const string = testCollection[0].body;
+
+    // console.log("testing", string);
+
 		return {
+
 			response: {
 				role: 'assistant' as const,
-				content: 'Шарик нашёл рычаг и дёрнул за него и открылась дверька',
+        content
 			},
 		};
 	},
