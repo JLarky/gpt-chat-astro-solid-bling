@@ -46,6 +46,7 @@ const runServer = fetch$(
 			}),
 		});
 		const data = (await res.json()) as {
+			usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 			choices?: { message: Message }[];
 		};
 		if (!data.choices) {
@@ -54,7 +55,7 @@ const runServer = fetch$(
 				error: 'Failed to get response from ChatGPT',
 			};
 		}
-		return { response: data.choices[0].message };
+		return { usage: data.usage, response: data.choices[0].message };
 	},
 	{
 		method: 'POST',
@@ -162,6 +163,7 @@ export const GPT = (props: { ru?: boolean; clean?: boolean }) => {
 								ref.value = trimmed;
 								return;
 							} else if (r.response) {
+								ref.title = JSON.stringify(r.usage);
 								setMessages((messages) => [...messages, r.response]);
 							}
 							ref.focus();
