@@ -36,7 +36,7 @@ const runServer = fetch$(
 				'OpenAI-Organization': org,
 			},
 			body: JSON.stringify({
-				model: 'gpt-3.5-turbo',
+				model: 'gpt-3.5-turbo-16k',
 				messages,
 				temperature: 0.5,
 				top_p: 1,
