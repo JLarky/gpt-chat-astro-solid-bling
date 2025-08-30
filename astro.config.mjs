@@ -8,7 +8,7 @@ import { common } from './qgp.config.mjs';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://qgp-qgp.deno.dev',
+	site: 'https://qgp-gpt.deno.dev',
 	integrations: [solid()],
 	vite: defineAstro(common, {}),
 	server: { port: 3000 },
